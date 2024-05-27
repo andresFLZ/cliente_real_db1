@@ -1,0 +1,12 @@
+.contenedor-perfil {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.circulo {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background-color: red;
+}

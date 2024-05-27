@@ -1,0 +1,244 @@
+<div class="container">
+    <div class="row my-4">
+        <div class="col-12 contenedor-perfil">
+            <div class="card" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ empleado.NOMEMPLEADO }} {{ empleado.APELLEMPLEADO }}</h5>
+                    <h6 class="card-subtitle mb-2 text-body-secondary">Correo: {{ empleado.CORREO }}</h6>
+                    <p class="card-text">Fecha ingreso: {{ empleado.FECHAINGRE }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div *ngIf="esCliente">
+                <div class="card my-4" *ngFor="let requerimiento of requerimientos">
+                    <div class="card-header">
+                        Requerimiento
+                    </div>
+                    <div class="card-body row">
+                        <div class="col-6">
+                            <h6 class="card-title text-center">Funciones</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item" *ngFor="let funcion of requerimiento.DESFUNCION">{{ funcion
+                                    }}
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="card-title text-center">Carreras</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item" *ngFor="let carrera of requerimiento.DESCARRERAS">{{ carrera
+                                    }}
+                                </li>
+                            </ul>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Fecha requerimiento: {{ requerimiento.FECHAREQUE }}</li>
+                            <li class="list-group-item">Fecha actual: {{ getCurrentDateTime() }}</li>
+                            <li class="list-group-item">Vacantes: {{ requerimiento.NVVACANTES }}</li>
+                        </ul>
+                        <div class="d-flex flex-column align-items-center">
+                            <select class="form-select w-50 my-3" aria-label="Default select example"
+                                [formControl]="analistaGeneralControl">
+                                <option selected>Analistas generales</option>
+                                <option *ngFor="let analista of analistasGenerales" value="{{ analista.CODEMPLEADO }}">
+                                    {{
+                                    analista.NOMEMPLEADO }} {{ analista.APELLEMPLEADO }}</option>
+                            </select>
+                            <button class="btn btn-primary w-50 my-3" (click)="enviarCorreo(requerimiento)">Enviar
+                                correo</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div *ngIf="esGeneral">
+                <div class="card my-4" *ngFor="let requerimiento of requerimientos">
+                    <div class="card-header">
+                        Requerimiento
+                    </div>
+                    <div class="card-body row">
+                        <div class="col-6">
+                            <h6 class="card-title text-center">Funciones</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item" *ngFor="let funcion of requerimiento.DESFUNCION">{{ funcion
+                                    }}
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="card-title text-center">Carreras</h6>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item" *ngFor="let carrera of requerimiento.DESCARRERAS">{{ carrera
+                                    }}
+                                </li>
+                            </ul>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">Fecha requerimiento: {{ requerimiento.FECHAREQUE }}</li>
+                            <li class="list-group-item">Fecha actual: {{ getCurrentDateTime() }}</li>
+                            <li class="list-group-item">Vacantes: {{ requerimiento.NVVACANTES }}</li>
+                        </ul>
+                        <div class="d-flex flex-column align-items-center" *ngIf="requerimiento.FASE == 1">
+                            <select class="form-select w-50 my-3" aria-label="Default select example"
+                                [formControl]="perfilesControl">
+                                <option selected>Perfiles</option>
+                                <option *ngFor="let perfil of perfiles" value="{{ perfil.IDPERFIL }}">{{
+                                    perfil.DESPERFIL }}</option>
+                            </select>
+                            <button class="btn btn-primary w-50 my-3" (click)="generarProceso(requerimiento)">Generar
+                                proceso</button>
+                        </div>
+                        <div class="row" *ngIf="requerimiento.FASE > 1">
+                            <div class="col-6">
+                                <h6 class="card-title text-center">Fases</h6>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center"
+                                        *ngFor="let fase of fases">
+                                        {{ fase.DESFASE }}
+                                        <div class="circulo"
+                                            [ngClass]="{'bg-success': fase.IDFASE <= requerimiento.FASE}">
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-6 d-flex align-items-center flex-column" *ngIf="requerimiento.FASE == 2">
+                                <h6 class="card-title text-center">Convocatoria</h6>
+                                <textarea class="form-control h-75" id="exampleFormControlTextarea1" rows="3"
+                                    [formControl]="convocatoriaControl"></textarea>
+                                <button class="btn btn-primary w-75 my-3"
+                                    (click)="generarConvocatoria(requerimiento)">Generar convocatoria</button>
+                            </div>
+                            <div class="col-6 d-flex align-items-center flex-column" *ngIf="requerimiento.FASE == 3">
+                                <h6 class="card-title text-center">Invitación</h6>
+                                <p>A continuación se muestran los candidatos existentes en nuestra base de datos que
+                                    hace match con el requerimiento</p>
+                                <div class="accordion w-100" id="accordionExample">
+                                    <div class="accordion-item" *ngFor="let candidato of candidatosProceso">
+                                        <h2 class="accordion-header" [attr.id]="'heading' + candidato.nombre">
+                                            <button class="accordion-button collapsed" type="button"
+                                                aria-expanded="false" data-bs-toggle="collapse"
+                                                [attr.data-bs-target]="'#collapse' + candidato.nombre"
+                                                aria-expanded="true"
+                                                [attr.aria-controls]="'collapse' + candidato.nombre">
+                                                {{ candidato.nombre }}
+                                            </button>
+                                        </h2>
+                                        <div [attr.id]="'collapse' + candidato.nombre"
+                                            class="accordion-collapse collapse"
+                                            [attr.aria-labelledby]="'heading' + candidato.nombre"
+                                            data-bs-parent="#accordionExample">
+                                            <div class="accordion-body">
+                                                <div class="" *ngFor="let data of candidato.data">
+                                                    <h6>{{ data.titulacion }}</h6>
+                                                    <p>Institución: {{ data.institucion }}</p>
+                                                    <p>Descripciones actividad:</p>
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                                                            *ngFor="let descripcion of data.descripciones">
+                                                            {{ descripcion }}
+                                                        </li>
+                                                    </ul>
+                                                    <p>Funciones actividad:</p>
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                                                            *ngFor="let funcion of data.funciones">
+                                                            {{ funcion }}
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <textarea class="form-control h-75 my-2" id="exampleFormControlTextarea1" rows="3"
+                                    [formControl]="invitacionControl"></textarea>
+                                <button class="btn btn-primary w-75 my-3"
+                                    (click)="generarInvitacion(requerimiento)">Generar invitación</button>
+                            </div>
+                            <div class="col-6 d-flex align-items-center flex-column" *ngIf="requerimiento.FASE == 4">
+                                <h6 class="card-title text-center">Preselección</h6>
+                                <p>A continuación se muestran los candidatos aspirantes</p>
+                                <div class="accordion w-100" id="accordionExample">
+                                    <div class="accordion-item" *ngFor="let candidato of candidatosPreseleccionados">
+                                        <h2 class="accordion-header" [attr.id]="'heading' + candidato.nombre">
+                                            <button class="accordion-button collapsed" type="button"
+                                                aria-expanded="false" data-bs-toggle="collapse"
+                                                [attr.data-bs-target]="'#collapse' + candidato.nombre"
+                                                aria-expanded="true"
+                                                [attr.aria-controls]="'collapse' + candidato.nombre">
+                                                {{ candidato.nombre }}
+                                            </button>
+                                        </h2>
+                                        <div [attr.id]="'collapse' + candidato.nombre"
+                                            class="accordion-collapse collapse"
+                                            [attr.aria-labelledby]="'heading' + candidato.nombre"
+                                            data-bs-parent="#accordionExample">
+                                            <div class="accordion-body">
+                                                <div class="" *ngFor="let data of candidato.data">
+                                                    <h6>{{ data.titulacion }}</h6>
+                                                    <p>Institución: {{ data.institucion }}</p>
+                                                    <p>Descripciones actividad:</p>
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                                                            *ngFor="let descripcion of data.descripciones">
+                                                            {{ descripcion }}
+                                                        </li>
+                                                    </ul>
+                                                    <p>Funciones actividad:</p>
+                                                    <ul class="list-group">
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center"
+                                                            *ngFor="let funcion of data.funciones">
+                                                            {{ funcion }}
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="my-2">
+                                    <div class="form-check"
+                                        *ngFor="let candidato of candidatosPreseleccionados; let i = index">
+                                        <input class="form-check-input" type="checkbox" value="{{ candidato.nombre }}"
+                                            id="flexCheckDefault{{ i }}" (change)="onCheckboxChange($event)">
+                                        <label class="form-check-label" for="flexCheckDefault{{ i }}">
+                                            {{ candidato.nombre }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary w-75 my-3"
+                                    (click)="seleccionarCandidatos(requerimiento)">Seleccionar candidatos</button>
+                            </div>
+                            <div class="col-6 d-flex align-items-center flex-column" *ngIf="requerimiento.FASE == 5">
+                                <h6 class="card-title text-center">Pruebas disponibles</h6>
+                                <div class="my-2">
+                                    <div class="form-check"
+                                        *ngFor="let prueba of requerimiento.PRUEBAS let i = index">
+                                        <input class="form-check-input" type="checkbox" value="{{ prueba.IDPRUEBA }}"
+                                            id="flexCheckDefault{{ i }}" (change)="onCheckboxPruebaChange($event)">
+                                        <label class="form-check-label" for="flexCheckDefault{{ i }}">
+                                            {{ prueba.DESCPRUEBA }}
+                                        </label>
+                                    </div>
+                                </div>
+                                <div *ngIf="mostrarFecha">
+                                    <label for="fecha">Asignar fecha<small></small></label>
+                                    <input type="date" id="fecha" name="fecha" class="sm-form-control" [formControl]="fechaPruebaControl">
+                                    <button class="btn btn-primary w-75 my-3"
+                                    (click)="asignarPruebas(requerimiento)">Asignar pruebas</button>
+                                </div>
+                            </div>
+                            <div class="col-6 d-flex align-items-center flex-column" *ngIf="requerimiento.FASE == 6">
+                                <h6 class="card-title text-center">Resultados pruebas</h6>
+                                <div *ngFor="let prueba of requerimiento.PRUEBAS">
+                                    <h6 class="card-title text-center">{{prueba.DESCPRUEBA}}</h6>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
